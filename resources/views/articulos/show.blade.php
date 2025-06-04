@@ -6,7 +6,7 @@
 
     <div class="mb-4 text-center">
         @if($articulo->imagen)
-            <img src="{{ asset($articulo->imagen) }}" alt="{{ $articulo->titulo }}" class="w-64 h-64 object-cover mx-auto rounded-lg shadow-lg">
+            <img src="{{ asset('storage/' . $articulo->imagen) }}" alt="{{ $articulo->titulo }}" class="w-64 h-64 object-cover mx-auto rounded-lg shadow-lg">
         @else
             <img src="{{ asset('images/placeholder.png') }}" alt="Sin imagen" class="w-64 h-64 object-cover mx-auto rounded-lg shadow-lg">
         @endif

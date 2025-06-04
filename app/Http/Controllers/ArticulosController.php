@@ -101,51 +101,40 @@ class ArticulosController extends Controller
         $imagePathForDb = $articulo->imagen; // Mantener la imagen existente por defecto
 
         if ($request->hasFile('imagen')) {
-            // Eliminar la imagen anterior si existe y no es el placeholder
-            if ($articulo->imagen && !Str::contains($articulo->imagen, 'placeholder.png')) {
-                // Asegúrate de que la ruta guardada no empiece con /, public_path() lo maneja bien
-                $oldImagePath = public_path(ltrim($articulo->imagen, '/'));
-                if (file_exists($oldImagePath)) {
+            // Eliminar la imagen anterior del disco 'public' de Storage
+            // Asegúrate de que la ruta de la imagen en DB sea relativa al disco 'public' (ej. 'imagenes_articulos/nombre.png')
+            if ($articulo->imagen) { // Solo si hay una imagen existente
+                // Verifica que la imagen no sea tu 'placeholder.png' si lo usas,
+                // aunque el `unlink` lo maneja mejor el Storage::delete()
+                // La ruta debe ser relativa al disco, no empezar con /
+                if (Storage::disk('public')->exists($articulo->imagen)) {
                     try {
-                        unlink($oldImagePath); // Eliminar el archivo físico
+                        Storage::disk('public')->delete($articulo->imagen);
+                        Log::info('Imagen antigua eliminada: ' . $articulo->imagen);
                     } catch (\Exception $e) {
-                        // Opcional: registrar el error si la eliminación falla, pero no detener la ejecución
-                        Log::error('Error al eliminar imagen antigua del public/: ' . $e->getMessage() . ' Ruta: ' . $oldImagePath);
+                        Log::error('Error al eliminar imagen antigua de Storage: ' . $e->getMessage() . ' Ruta: ' . $articulo->imagen);
                     }
                 }
             }
 
+            // Subir la nueva imagen al disco 'public' de Storage
             $image = $request->file('imagen');
-            $extension = $image->getClientOriginalExtension();
-            $fileName = Str::uuid() . '.' . $extension;
-
-            $destinationFolder = 'imagenes_articulos';
-            $destinationPath = public_path($destinationFolder);
-
-            // *** Intenta crear la carpeta si no existe. Esto es crucial. ***
-            if (!file_exists($destinationPath)) {
-                try {
-                    mkdir($destinationPath, 0777, true);
-                } catch (\Exception $e) {
-                    return redirect()->back()->withInput()->with('error', 'Error al crear la carpeta de imágenes: ' . $e->getMessage() . '. Por favor, verifica los permisos de escritura en el directorio ' . dirname($destinationPath));
-                }
-            }
-
-            // *** Intenta mover el nuevo archivo ***
             try {
-                $image->move($destinationPath, $fileName);
-                $imagePathForDb = '/' . $destinationFolder . '/' . $fileName;
+                // putFile() genera un nombre de archivo único por defecto (hash) y devuelve la ruta relativa al disco.
+                // Esta es la forma preferida y maneja subcarpetas y permisos automáticamente si el disco está configurado.
+                $imagePathForDb = Storage::disk('public')->putFile('imagenes_articulos', $image);
+                Log::info('Nueva imagen subida: ' . $imagePathForDb);
             } catch (\Exception $e) {
-                return redirect()->back()->withInput()->with('error', 'Error al subir la nueva imagen: ' . $e->getMessage() . '. Asegúrate de que la carpeta ' . $destinationPath . ' tenga permisos de escritura.');
+                Log::error('Error al subir la nueva imagen a Storage: ' . $e->getMessage());
+                return redirect()->back()->withInput()->with('error', 'Error al subir la nueva imagen: ' . $e->getMessage());
             }
         }
         // Si no se sube una nueva imagen, $imagePathForDb mantiene la URL de la imagen antigua
 
-        $validatedData['imagen'] = $imagePathForDb;
+        $validatedData['imagen'] = $imagePathForDb; // Asigna la ruta guardada o null a los datos validados
 
         $articulo->update($validatedData); // Actualiza los datos del artículo
 
-        // *** REDIRECCIÓN FALTANTE EN TU CÓDIGO ANTERIOR ***
         return redirect()->route('articulos.index')
             ->with('success', 'Artículo actualizado exitosamente.');
     }
