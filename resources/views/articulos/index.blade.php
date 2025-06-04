@@ -3,7 +3,7 @@
 @section('content')
 <div class="bg-white p-6 rounded-lg shadow-md">
     <h2 class="text-2xl font-bold mb-4">Listado de Artículos
-        
+
     </h2>
 
     <div class="mb-4">
@@ -32,8 +32,8 @@
                 <tr class="hover:bg-gray-50">
                     <td class="py-2 px-4 border-b">{{ $articulo->id }}</td>
                     <td class="py-2 px-4 border-b">
-                        @if($articulo->imagen_path)
-                        <img src="{{ asset('storage/' . $articulo->imagen_path) }}" alt="{{ $articulo->titulo }}" class="w-16 h-16 object-cover rounded-md">
+                        @if($articulo->imagen) 
+                        <img src="{{ asset('storage/' . $articulo->imagen) }}" alt="{{ $articulo->titulo }}" class="w-16 h-16 object-cover rounded-md"> {{-- ¡¡¡Cambiar aquí también!!! --}}
                         @else
                         <span class="text-gray-400">Sin imagen</span>
                         @endif
@@ -44,17 +44,17 @@
                     <td class="py-2 px-4 border-b whitespace-nowrap">
                         <!-- <a href="{{ route('articulos.show', $articulo->id) }}" class="text-blue-600 hover:underline mr-2">Ver</a> -->
                         <a href="{{ route('articulos.show', $articulo->id) }}"
-                           class="text-gray-800 hover:text-gray-900 p-1 rounded-md cursor-pointer inline-flex items-center justify-center"> {{-- Color negro --}}
+                            class="text-gray-800 hover:text-gray-900 p-1 rounded-md cursor-pointer inline-flex items-center justify-center"> {{-- Color negro --}}
                             <svg class="w-6 h-6" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                                <path stroke="currentColor" stroke-width="2" d="M21 12c0 1.2-4.03 6-9 6s-9-4.8-9-6c0-1.2 4.03-6 9-6s9 4.8 9 6Z"/>
-                                <path stroke="currentColor" stroke-width="2" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/>
+                                <path stroke="currentColor" stroke-width="2" d="M21 12c0 1.2-4.03 6-9 6s-9-4.8-9-6c0-1.2 4.03-6 9-6s9 4.8 9 6Z" />
+                                <path stroke="currentColor" stroke-width="2" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
                             </svg>
                         </a>
                         <!-- <a href="{{ route('articulos.edit', $articulo->id) }}" class="text-yellow-600 hover:underline mr-2">Editar</a> -->
                         <a href="{{ route('articulos.edit', $articulo->id) }}"
-                           class="text-yellow-600 hover:text-yellow-800 p-1 rounded-md cursor-pointer inline-flex items-center justify-center"> {{-- Color amarillo --}}
+                            class="text-yellow-600 hover:text-yellow-800 p-1 rounded-md cursor-pointer inline-flex items-center justify-center"> {{-- Color amarillo --}}
                             <svg class="w-6 h-6" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m14.304 4.844 2.852 2.852M7 7H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-4.5m2.409-9.91a2.017 2.017 0 0 1 0 2.853l-6.844 6.844L8 14l.713-3.565 6.844-6.844a2.015 2.015 0 0 1 2.852 0Z"/>
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m14.304 4.844 2.852 2.852M7 7H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-4.5m2.409-9.91a2.017 2.017 0 0 1 0 2.853l-6.844 6.844L8 14l.713-3.565 6.844-6.844a2.015 2.015 0 0 1 2.852 0Z" />
                             </svg>
                         </a>
                         <form action="{{ route('articulos.destroy', $articulo->id) }}" method="POST" class="inline">
