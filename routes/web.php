@@ -7,7 +7,7 @@ use App\Http\Controllers\CategoriasController;
 // Ruta de inicio que redirige al listado de artículos
 Route::get('/', function () {
     return view('dashboard'); // Esto cargará la vista dashboard.blade.php
-})->name('home');
+});
 
 // Rutas resource para Articulos (CRUD completo)
 Route::resource('articulos', ArticulosController::class);
