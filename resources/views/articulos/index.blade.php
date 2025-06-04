@@ -33,7 +33,7 @@
                     <td class="py-2 px-4 border-b">{{ $articulo->id }}</td>
                     <td class="py-2 px-4 border-b">
                         @if($articulo->imagen)
-                        <img src="{{ asset($articulo->imagen) }}" alt="{{ $articulo->titulo }}" class="w-16 h-16 object-cover rounded-md">
+                        <img src="{{ asset('storage/' . $articulo->imagen_path) }}" alt="{{ $articulo->titulo }}" class="w-16 h-16 object-cover rounded-md">
                         @else
                         <span class="text-gray-400">Sin imagen</span>
                         @endif
