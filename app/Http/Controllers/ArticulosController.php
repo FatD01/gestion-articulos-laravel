@@ -42,48 +42,31 @@ class ArticulosController extends Controller
             'categoria_id' => 'required|exists:categorias,id', // Debe existir en la tabla categorias
         ]);
 
-        $imagePathForDb = null; // Inicializamos la ruta de la imagen a null
+        $imagePathForDb = null;
 
         if ($request->hasFile('imagen')) {
             $image = $request->file('imagen');
-            $extension = $image->getClientOriginalExtension();
-            $fileName = Str::uuid() . '.' . $extension; // Genera un nombre de archivo único con UUID
-
-            // Define la ruta absoluta donde se guardará la imagen dentro de public
-            $destinationFolder = 'imagenes_articulos'; // Nombre de la carpeta deseada
-            $destinationPath = public_path($destinationFolder); // Ruta absoluta completa
-
-            // *** Intenta crear la carpeta si no existe. Esto es crucial. ***
-            if (!file_exists($destinationPath)) {
-                try {
-                    // Crea la carpeta de forma recursiva con permisos 0777 para asegurar escritura en Windows
-                    // (Puedes reducir a 0755 en un entorno de producción si es seguro)
-                    mkdir($destinationPath, 0777, true);
-                } catch (\Exception $e) {
-                    // Si falla la creación de la carpeta, redirige con un mensaje de error explícito
-                    return redirect()->back()->withInput()->with('error', 'Error al crear la carpeta de imágenes: ' . $e->getMessage() . '. Por favor, verifica los permisos de escritura en el directorio ' . dirname($destinationPath));
-                }
-            }
-
-            // *** Intenta mover el archivo subido a la carpeta destino. ***
+            // La función store() de la fachada Storage guarda el archivo en el disco especificado.
+            // El primer argumento es la carpeta dentro del disco (ej. 'imagenes_articulos' dentro de storage/app/public)
+            // El segundo argumento es el 'disco' que quieres usar, en este caso 'public' (definido en config/filesystems.php)
             try {
-                $image->move($destinationPath, $fileName);
-                // La ruta para guardar en la base de datos es relativa a la carpeta public
-                $imagePathForDb = '/' . $destinationFolder . '/' . $fileName; // Ejemplo: /imagenes_articulos/nombre_unico.jpg
+                $imagePathForDb = Storage::disk('public')->putFile('imagenes_articulos', $image);
+                // putFile() ya genera un nombre de archivo único por defecto (hash) y devuelve la ruta relativa al disco.
+                // Si necesitas un nombre de archivo específico como tu UUID, usarías putFileAs:
+                // $fileName = Str::uuid() . '.' . $image->getClientOriginalExtension();
+                // $imagePathForDb = Storage::disk('public')->putFileAs('imagenes_articulos', $image, $fileName);
             } catch (\Exception $e) {
-                // Si falla el movimiento del archivo, redirige con un mensaje de error explícito
-                return redirect()->back()->withInput()->with('error', 'Error al subir la imagen: ' . $e->getMessage() . '. Asegúrate de que la carpeta ' . $destinationPath . ' tenga permisos de escritura.');
+                return redirect()->back()->withInput()->with('error', 'Error al subir la imagen a Storage: ' . $e->getMessage());
             }
         }
 
-        $validatedData['imagen'] = $imagePathForDb; // Asigna la ruta pública o null a los datos validados
+        $validatedData['imagen'] = $imagePathForDb; // Asigna la ruta guardada o null a los datos validados
 
         Articulo::create($validatedData);
 
         return redirect()->route('articulos.index')
-                         ->with('success', 'Artículo creado exitosamente.');
+            ->with('success', 'Artículo creado exitosamente.');
     }
-
     /**
      * Display the specified resource.
      */
@@ -164,7 +147,7 @@ class ArticulosController extends Controller
 
         // *** REDIRECCIÓN FALTANTE EN TU CÓDIGO ANTERIOR ***
         return redirect()->route('articulos.index')
-                         ->with('success', 'Artículo actualizado exitosamente.');
+            ->with('success', 'Artículo actualizado exitosamente.');
     }
 
     /**
@@ -190,6 +173,6 @@ class ArticulosController extends Controller
 
         // *** REDIRECCIÓN FALTANTE EN TU CÓDIGO ANTERIOR ***
         return redirect()->route('articulos.index')
-                         ->with('success', 'Artículo eliminado exitosamente.');
+            ->with('success', 'Artículo eliminado exitosamente.');
     }
 }
